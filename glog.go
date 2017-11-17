@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"sync"
 	"time"
 )
 
@@ -14,6 +15,7 @@ import (
 // file rotation. There are conflicting methods, so the file cannot be embedded.
 // l.mu is held for all its methods.
 type syncBuffer struct {
+	mu sync.Mutex
 	*bufio.Writer
 	file   *os.File
 	nbytes uint64 // The number of bytes written to this file
@@ -60,7 +62,7 @@ func (sb *syncBuffer) rotateFile(now time.Time) error {
 		sb.file.Close()
 	}
 	var err error
-	sb.file, _, err = create("INFO", now)
+	sb.file, _, err = create("log", now)
 	sb.nbytes = 0
 	if err != nil {
 		return err
