@@ -105,3 +105,40 @@ func doFmtVerbLevelColor(layout string, level Level, output io.Writer) {
 	// TODO not supported on Windows since the io.Writer here is actually a
 	// bytes.Buffer.
 }
+
+//a local file log
+
+// LogBackendFile utilizes the standard log module.
+type LogBackendFile struct {
+	Logger      *syncBuffer
+	Color       bool
+	ColorConfig []string
+}
+
+// NewLogBackendFile creates a new LogBackend.
+func NewLogBackendFile(out io.Writer, prefix string, flag int) *LogBackendFile {
+	return &LogBackendFile{Logger: createFiles()}
+}
+
+// Log implements the Backend interface.
+func (b *LogBackendFile) Log(level Level, calldepth int, rec *Record) error {
+	//if b.Color {
+	//	col := colors[level]
+	//	if len(b.ColorConfig) > int(level) && b.ColorConfig[level] != "" {
+	//		col = b.ColorConfig[level]
+	//	}
+
+	//	buf := &bytes.Buffer{}
+	//	buf.Write([]byte(col))
+	//	buf.Write([]byte(rec.Formatted(calldepth + 1)))
+	//	buf.Write([]byte("\033[0m"))
+	//	// For some reason, the Go logger arbitrarily decided "2" was the correct
+	//	// call depth...
+	//	return b.Logger.Write(buf.Bytes())
+	//}
+
+	buf := &bytes.Buffer{}
+	buf.Write([]byte(rec.Formatted(calldepth + 1)))
+	buf.Write([]byte("\n"))
+	return b.Logger.Write(buf.Bytes())
+}
