@@ -158,16 +158,16 @@ func (l *Logger) log(lvl Level, format *string, args ...interface{}) {
 	// TODO use channels to fan out the records to all backends?
 	// TODO in case of errors, do something (tricky)
 
-	// calldepth=2 brings the stack up to the caller of the level
+	// calldepth=3 brings the stack up to the caller of the level
 	// methods, Info(), Fatal(), etc.
 	// ExtraCallDepth allows this to be extended further up the stack in case we
 	// are wrapping these methods, eg. to expose them package level
 	if l.haveBackend {
-		l.backend.Log(lvl, 2+l.ExtraCalldepth, record)
+		l.backend.Log(lvl, 3+l.ExtraCalldepth, record)
 		return
 	}
 
-	defaultBackend.Log(lvl, 2+l.ExtraCalldepth, record)
+	defaultBackend.Log(lvl, 3+l.ExtraCalldepth, record)
 }
 
 // Fatal is equivalent to l.Critical(fmt.Sprint()) followed by a call to os.Exit(1).
