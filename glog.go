@@ -21,6 +21,8 @@ type syncBuffer struct {
 	nbytes uint64 // The number of bytes written to this file
 }
 
+var logging *syncBuffer
+
 // createFiles creates all the log files for severity from sev down to infoLog.
 func createFiles() *syncBuffer {
 	now := time.Now()
@@ -28,6 +30,7 @@ func createFiles() *syncBuffer {
 	if err := sb.rotateFile(now); err != nil {
 		panic("createFiles: " + err.Error())
 	}
+	logging = sb
 	go sb.flushDaemon()
 	return sb
 }
@@ -81,7 +84,7 @@ func (sb *syncBuffer) rotateFile(now time.Time) error {
 	return err
 }
 
-const flushInterval = 3 * time.Second
+const flushInterval = 30 * time.Second
 
 // flushDaemon periodically flushes the log file buffers.
 func (sb *syncBuffer) flushDaemon() {
@@ -105,4 +108,9 @@ func (sb *syncBuffer) flushAll() {
 		sb.Flush()     // ignore error
 		sb.file.Sync() // ignore error
 	}
+}
+
+// Flush flushes all pending log I/O.
+func Flush() {
+	logging.lockAndFlushAll()
 }
