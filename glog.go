@@ -36,7 +36,7 @@ func createFiles() *syncBuffer {
 }
 
 func (sb *syncBuffer) Write(p []byte) error {
-	//l.mu.Lock()
+	sb.mu.Lock()
 	if sb.nbytes+uint64(len(p)) >= MaxSize {
 		if err := sb.rotateFile(time.Now()); err != nil {
 			sb.flushAll()
@@ -49,7 +49,7 @@ func (sb *syncBuffer) Write(p []byte) error {
 		sb.flushAll()
 		os.Exit(2)
 	}
-	//l.mu.Unlock()
+	sb.mu.Unlock()
 	return err
 }
 
@@ -95,9 +95,9 @@ func (sb *syncBuffer) flushDaemon() {
 
 // lockAndFlushAll is like flushAll but locks l.mu first.
 func (sb *syncBuffer) lockAndFlushAll() {
-	//l.mu.Lock()
+	sb.mu.Lock()
 	sb.flushAll()
-	//l.mu.Unlock()
+	sb.mu.Unlock()
 }
 
 // flushAll flushes all the logs and attempts to "sync" their data to disk.
